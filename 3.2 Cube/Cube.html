@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>HTML 5 Boilerplate</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="glsim.js"></script>
+    <script>
+
+
+        let rotateX = 25;
+        let rotateY = -25;
+        let rotateZ = 25;
+
+        function square(r, g, b) {
+            glColor3f(r, g, b);
+            glBegin(GL_TRIANGLE_FAN);
+            glVertex3f(-0.5, -0.5, 0.5);
+            glVertex3f(0.5, -0.5, 0.5);
+            glVertex3f(0.5, 0.5, 0.5);
+            glVertex3f(-0.5, 0.5, 0.5);
+            glEnd();
+        }
+
+        function cube(size) {
+
+            glPushMatrix();
+            glScalef(size, size, size);
+
+            square(1, 0, 0);
+
+            glPushMatrix();
+            glRotatef(90, 0, 1, 0);
+            square(0, 1, 0);
+            glPopMatrix();
+
+            glPushMatrix();
+            glRotatef(-90, 1, 0, 0);
+            square(0, 0, 1);
+            glPopMatrix();
+
+            glPushMatrix();
+            glRotatef(180, 0, 1, 0);
+            square(0, 1, 1);
+            glPopMatrix();
+
+            glPushMatrix();
+            glRotatef(-90, 0, 1, 0);
+            square(1, 0, 1);
+            glPopMatrix();
+
+            glPushMatrix();
+            glRotatef(90, 1, 0, 0);
+            square(1, 1, 0);
+            glPopMatrix();
+
+            glPopMatrix();
+        }
+
+
+        function display() {
+
+            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+            glLoadIdentity();
+            glRotatef(rotateZ, 0, 0, 1);
+            glRotatef(rotateY, 0, 1, 0);
+            glRotatef(rotateX, 1, 0, 0);
+
+            cube(1);
+        }
+
+        function initGL() {
+            glMatrixMode(GL_PROJECTION);
+            glOrtho(-1, 1, -1, 1, -1, 1);
+            glMatrixMode(GL_MODELVIEW);
+            glEnable(GL_DEPTH_TEST);
+            glClearColor(0, 0, 0, 1);
+        }
+
+
+        function init() {
+            try {
+                glsimUse("glcanvas");
+            }
+            catch (e) {
+                document.getElementById("canvas-holder").innerHTML =
+                    "Sorry, an error occured:<br>" + e;
+                return;
+            }
+            initGL();
+            display();
+        }
+
+    </script>
+</head>
+
+<body onload="init()">
+    <canvas id="glcanvas" width="500" height="500"></canvas>
+</body>
+
+</html>

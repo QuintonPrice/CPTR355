@@ -1,0 +1,209 @@
+<!--
+ Use OpenGL and GLUT to draw a simple cube
+  with each face being a different color. Rotations
+  can be applied with the arrow keys, the page up
+  key, and the page down key. The home key will set
+  all rotations to 0. Initial rotations about the
+  x, y, and z axes are 15, -15, and 0. 
+
+  This program is meant as an example of using modeling
+  transforms, with glPushMatrix and glPopMatrix.
+ 
+  Note that this program does not use lighting.
+-->
+
+<head>
+    <meta charset="UTF-8">
+    <title>Pyramids</title>
+
+    <script src="glsim.js"></script> <!-- load the OpenGL 1.1 simulation code -->
+
+</head>
+
+<body onload="init()">
+
+    <h3>A Simple Unlit Pyramid in OpenGL 1.1</h3>
+
+    <h1 id="view">Orthographic</h1>
+    <p>(Rotate using arrow keys, page up, page down, and home keys.)</p>
+    <p>Press I and O to change the distance between the triangles</p>
+    <noscript>
+        <p><b>Sorry, this page requires JavaScript!</b></p>
+    </noscript>
+
+    <div id="canvas-holder">
+        <canvas id="glcanvas" width="500" height="500"></canvas>
+    </div>
+
+</body>
+
+<script>
+
+    let frustum = false; // show frustrum boolean
+    let distance = 1.2; // distance between triangles
+    let size = 1; // size
+    let rotateX = 15;   // rotations of cube about the axes
+    let rotateY = -15;
+    let rotateZ = 0;
+
+    let viewHTML = document.getElementById("view");
+
+    function triangle(r, g, b) {
+
+        // actual triangle part
+        glColor3f(r, g, b);
+        glBegin(GL_TRIANGLE_FAN);
+        glVertex3f(-0.75, -0.75, 0.75);
+        glVertex3f(0.75, -0.75, 0.75);
+        glVertex3f(0, 0.75, 0);
+        glEnd();
+
+        // triangle lines
+        glColor3f(0, 0, 0);
+        glBegin(GL_LINES);
+        glVertex3f(-0.75, -0.75, 0.75);
+        glVertex3f(0, 0.75, 0);
+        glVertex3f(0.75, -0.75, 0.75);
+        glVertex3f(-0.75, -0.75, 0.75);
+        glEnd();
+    }
+
+    function square(r, g, b) {
+        glColor3f(r, g, b);
+        glBegin(GL_TRIANGLE_FAN);
+        glVertex3f(-0.75, -0.75, 0.75);
+        glVertex3f(0.75, -0.75, 0.75);
+        glVertex3f(0.75, 0.75, 0.75);
+        glVertex3f(-0.75, 0.75, 0.75);
+        glEnd();
+    }
+
+    function pyramid(size, r, g, b) {
+
+        glScalef(size, size, size); // scales the triangle
+
+        // adds sides to the triangle
+        glPushMatrix();
+        triangle(0.0, 0.0, 1.0);
+
+        glPushMatrix();
+        glRotatef(90, 0, 1, 0);
+        triangle(255, 0, 111);
+        glPopMatrix();
+
+        glPushMatrix();
+        glRotatef(-90, 0, 1, 0);
+        triangle(0.0, 1.0, 0.0);
+        glPopMatrix();
+
+        glPushMatrix();
+        glRotatef(180, 0, 1, 0);
+        triangle(1.0, 0.0, 0.0);
+        glPopMatrix();
+
+        glPushMatrix();
+        glRotatef(90, 1, 0, 0);
+
+        // pyramid base, corresponds with 
+        // the rgb value given in pyramid() call
+        square(r, g, b);
+        glPopMatrix();
+
+        glPopMatrix();
+
+    }
+
+    // ----------------------------------------------------------------------
+
+    function display() {  // Draws the image.
+
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+        glLoadIdentity(); // Set up modelview transform.
+
+        if (frustum) {
+            glFrustum(-1, 1, -1, 1, 1, 10);
+            glTranslatef(0, 0, -5);
+            glScalef(5, 5, 5);
+        } else {
+            glOrtho(-1, 1, -1, 1, -1, 1);
+        }
+
+        glRotatef(rotateZ, 0, 0, 1);
+        glRotatef(rotateY, 0, 1, 0);
+        glRotatef(rotateX, 1, 0, 0);
+
+        glTranslatef(-0.5, 0, 0); // starting point
+        pyramid(0.5, 0.0, 1.0, 1.0);
+
+        glTranslatef(distance, 0, 0);
+
+        pyramid(0.4, 1, 0, 1);
+
+        glTranslatef(distance, 0, 0);
+
+        pyramid(0.35, 1.5, 1.0, 1.0);
+
+    }
+
+    function initGL() {
+        glMatrixMode(GL_PROJECTION);
+        glOrtho(-1, 1, -1, 1, -1, 1);
+        glMatrixMode(GL_MODELVIEW);
+        glEnable(GL_DEPTH_TEST);
+        glClearColor(0, 0, 0, 1);
+    }
+
+    function doKeyDown(evt) {
+        let key = evt.keyCode;
+        if (key == 37) // left
+            rotateY -= 15;
+        else if (key == 39) // right
+            rotateY += 15;
+        else if (key == 40) // down
+            rotateX += 15;
+        else if (key == 38) // up
+            rotateX -= 15;
+        else if (key == 33) // page up
+            rotateZ += 15;
+        else if (key == 34) // page down
+            rotateZ -= 15;
+        else if (key == 73) // I
+            distance += 0.1;
+        else if (key == 79) // O
+            distance -= 0.1;
+        else if (key == 80) { // P
+            console.log("p pressed");
+            if (frustum == false) {
+                frustum = true;
+                viewHTML.innerHTML = "Frustum";
+            } else {
+                frustum = false;
+                viewHTML.innerHTML = "Ortho";
+            }
+        }
+        else if (key == 36)  // home
+            rotateX = rotateY = rotateZ = 0;
+        if (key >= 34 && key <= 40) {
+            evt.preventDefault();
+        }
+        display();
+    }
+
+    function init() {  // Called by <body onload="init()">, when the page has loaded.
+        try {
+            glsimUse("glcanvas"); // OpenGL will draw to the canvas with id="glcanvas".
+        }
+        catch (e) {
+            document.getElementById("canvas-holder").innerHTML =
+                "Sorry, an error occured:<br>" + e;
+            return;
+        }
+        document.onkeydown = doKeyDown;
+        initGL();
+        display();
+    }
+
+</script>
+
+</html>
