@@ -67,30 +67,65 @@
     }
     // ----------------------------------------------------------------------
 
+
+
     function display() {  // Draws the image.
 
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        glMatrixMode(GL_MODELVIEW)
-        glLoadIdentity(); // Set up modelview transform.
+        glMatrixMode(GL_MODELVIEW);
+        glLoadIdentity();
 
-        glEnable(GL_LIGHTING);
-        glEnable(GL_LIGHT0);
-        glLightfv(GL_LIGHT0, GL_POSITION, [1, 1, 0, 0]);
-        smoothSphere(0.5, 32, 64);
+        // set up lighting from sun
+        glLightfv(GL_LIGHT0, GL_POSITION, [1, 0.5, 0.6, 0]);
 
-        glTranslate(0.8, 0.9, 0);
+        // create snowman
+        glTranslatef(0, -0.5, 0);
+        smoothSphere(0.4, 32, 64);
+
+        glTranslatef(0, 0.6, 0);
+        smoothSphere(0.3, 32, 64);
+
+        glTranslatef(0, 0.45, 0);
+        smoothSphere(0.2, 32, 64);
+        
+        glTranslatef(0.8, 0.25, 0);
         glMaterialfv(GL_FRONT, GL_EMISSION, [1, 1, 0, 0]);
-        glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DEFUSE, [0, 0, 0, 0,]);
-        smoothSphere(0.15, 32, 64)
+
+        smoothSphere(0.075, 32, 64);
+
+        glMaterialfv(GL_FRONT, GL_EMISSION, [1, 1, 1, 1]);
+
+        // ground
+        glBegin(GL_LINE_LOOP);
+        glPointSize(10);
+        glVertex2f(-2, -1.7);
+        glVertex2f(1, -1.7);
+        glEnd();
 
     }
 
     function initGL() {
-        glMatrixMode(GL_PROJECTION);
-        glOrtho(-1, 1, -1, 1, -1, 1);
-        glMatrixMode(GL_MODELVIEW);
+        
+        // setting up for 3d rendering
+        glEnable(GL_LIGHTING);
+        glEnable(GL_LIGHT0);
         glEnable(GL_DEPTH_TEST);
+        glMatrixMode(GL_PROJECTION);
+
+        // background color
         glClearColor(0, 0, 0, 1);
+
+        glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE, [1, 1, 1, 1]);
+        glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, [1, 1, 1, 1]);
+        
+        // controls shininess
+        glMateriali(GL_FRONT_AND_BACK, GL_SHININESS, 10);
+
+        // color of light
+        glLightModelfv(GL_LIGHT_MODEL_AMBIENT, [0.35, 0.35, 0.35, 1]);
+
+        glLoadIdentity();
+        glOrtho(-1, 1, -1, 1, -2, 2);
     }
 
     function doKeyDown(evt) {
@@ -111,16 +146,6 @@
             distance += 0.1;
         else if (key == 79) // O
             distance -= 0.1;
-        else if (key == 80) { // P
-            console.log("p pressed");
-            if (frustum == false) {
-                frustum = true;
-                viewHTML.innerHTML = "Frustum";
-            } else {
-                frustum = false;
-                viewHTML.innerHTML = "Ortho";
-            }
-        }
         else if (key == 36)  // home
             rotateX = rotateY = rotateZ = 0;
         if (key >= 34 && key <= 40) {
